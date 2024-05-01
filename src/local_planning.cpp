@@ -69,38 +69,7 @@ void Local_Planner::init(ros::NodeHandle& nh)
     Command_Now.source = NODE_NAME;
     desired_yaw = 0.0;
 
-    //　仿真模式下直接发送切换模式与起飞指令
-    if(sim_mode == true)
-    {
-        // Waiting for input
-        int start_flag = 0;
-        while(start_flag == 0)
-        {
-            cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>Global Planner<<<<<<<<<<<<<<<<<<<<<<<<<<< "<< endl;
-            cout << "Please input 1 for start:"<<endl;
-            cin >> start_flag;
-        }
-        // 起飞
-        Command_Now.header.stamp = ros::Time::now();
-        Command_Now.Mode  = prometheus_msgs::ControlCommand::Idle;
-        Command_Now.Command_ID = Command_Now.Command_ID + 1;
-        Command_Now.source = NODE_NAME;
-        Command_Now.Reference_State.yaw_ref = 999;
-        command_pub.publish(Command_Now);   
-        cout << "Switch to OFFBOARD and arm ..."<<endl;
-        ros::Duration(3.0).sleep();
-        
-        Command_Now.header.stamp = ros::Time::now();
-        Command_Now.Mode = prometheus_msgs::ControlCommand::Takeoff;
-        Command_Now.Command_ID = Command_Now.Command_ID + 1;
-        Command_Now.source = NODE_NAME;
-        command_pub.publish(Command_Now);
-        cout << "Takeoff ..."<<endl;
-        ros::Duration(3.0).sleep();
-    }else
-    {
-        //　真实飞行情况：等待飞机状态变为offboard模式，然后发送起飞指令
-    }
+    cout << "[planner] APF-Planner initialized!" << endl;
 
     // 地图初始化
     sensor_msgs::PointCloud2ConstPtr init_local_map(new sensor_msgs::PointCloud2());
