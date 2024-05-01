@@ -2,23 +2,19 @@
 
 namespace Local_Planning
 {
-
 void APF::init(ros::NodeHandle& nh)
 {
     has_local_map_ = false;
 
-    nh.param("apf/inflate_distance", inflate_distance, 0.20);  // 感知障碍物距离
-    nh.param("apf/sensor_max_range", sensor_max_range, 2.5);  // 感知障碍物距离
+    nh.param("apf/inflate_distance", inflate_distance, 0.35);  // 感知障碍物距离
+    nh.param("apf/sensor_max_range", sensor_max_range, 5.0);  // 感知障碍物距离
     nh.param("apf/k_push", k_push, 0.8);                         // 推力增益
     nh.param("apf/k_att", k_att, 0.4);                                  // 引力增益
     nh.param("apf/min_dist", min_dist, 0.2);                            // 最小壁障距离
     nh.param("apf/max_att_dist", max_att_dist, 5.0);             // 最大吸引距离
     nh.param("apf/ground_height", ground_height, 0.1);  // 地面高度
-    nh.param("apf/ground_safe_height", ground_safe_height, 0.2);  // 地面安全距离
-    nh.param("apf/safe_distance", safe_distance, 0.15); // 安全停止距离
-
-    // TRUE代表2D平面规划及搜索,FALSE代表3D 
-    nh.param("local_planner/is_2D", is_2D, true); 
+    nh.param("apf/ground_safe_height", ground_safe_height, 0.3);  // 地面安全距离
+    nh.param("apf/safe_distance", safe_distance, 0.1); // 安全停止距离
 }
 
 void APF::set_local_map(sensor_msgs::PointCloud2ConstPtr &local_map_ptr)
@@ -141,18 +137,12 @@ int APF::compute_force(Eigen::Vector3d &goal, Eigen::Vector3d &desired_vel)
                                                     cur_odom_.pose.pose.orientation.y,  
                                                     cur_odom_.pose.pose.orientation.z); 
 
-
     Eigen::Matrix<double,3,3> rotation_mat_local_to_global = cur_rotation_local_to_global.toRotationMatrix();
 
     push_force = rotation_mat_local_to_global * push_force; 
 
     // 合力
     desired_vel = push_force + attractive_force;
-
-    if(is_2D)
-    {
-        desired_vel[2] = 0.0;
-    }
 
     // 如果不安全的点超出，
     if(safe_cnt>10)
@@ -163,19 +153,7 @@ int APF::compute_force(Eigen::Vector3d &goal, Eigen::Vector3d &desired_vel)
         local_planner_state =1;  //成功规划， 安全
     }
 
-    static int exec_num=0;
-    exec_num++;
-
-    // 此处改为根据循环时间计算的数值
-    if(exec_num == 50)
-    {
-        printf("APF calculate take %f [s].\n",   (ros::Time::now()-begin_collision).toSec());
-        exec_num=0;
-    }  
-
     return local_planner_state;
 }
-
-
 
 }

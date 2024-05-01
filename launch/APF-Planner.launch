@@ -4,12 +4,9 @@
     <node pkg="apf_planner" type="local_planner_main" name="local_planner_main" output="screen" launch-prefix="gnome-terminal --">
         <!-- 参数 -->
         <param name="uav_id" value="1"/>
-        <param name="local_planner/sim_mode" value="true"/>
         <!-- 地图输入模式 0代表全局点云，1代表局部点云，2代表激光雷达scan数据 -->
         <param name="local_planner/map_input_source" value="0"/>
-        <param name="local_planner/local_pcl_topic_name" value="/map_generator/local_cloud"/>
-        <!-- 无人机飞行高度，建议与起飞高度一致 -->
-        <param name="local_planner/fly_height" value="1.0"/>
+        <param name="local_planner/local_pcl_topic_name" value="/prometheus/sensors/3Dlidar_scan"/>
         <!-- 最大速度 -->
         <param name="local_planner/max_planning_vel" value="0.5"/>
 

@@ -29,23 +29,16 @@ using namespace std;
 
 namespace Local_Planning
 {
-
 extern ros::Publisher message_pub;
-
 class Local_Planner
 {
-
 private:
-
     ros::NodeHandle local_planner_nh;
 
     // 参数
     int lidar_model;
-    bool is_2D;
     double max_planning_vel;
-    double fly_height_2D;
     double safe_distance;
-    bool sim_mode;
     bool map_groundtruth;
 
     // 订阅无人机状态、目标点、传感器数据（生成地图）
@@ -69,9 +62,6 @@ private:
     double distance_to_goal;
 
     // 规划器状态
-    bool odom_ready;
-    bool drone_ready;
-    bool sensor_ready;
     bool goal_ready; 
     bool is_safety;
     bool path_ok;
@@ -94,7 +84,6 @@ private:
         WAIT_GOAL,
         PLANNING,
         TRACKING,
-        LANDING,
     };
     EXEC_STATE exec_state;
 
@@ -122,8 +111,5 @@ public:
     void init(ros::NodeHandle& nh);
 
 };
-
-
-
 }
 #endif 
