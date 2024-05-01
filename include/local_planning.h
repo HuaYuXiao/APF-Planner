@@ -5,7 +5,6 @@
 #include <Eigen/Eigen>
 #include <iostream>
 #include <algorithm>
-
 #include <geometry_msgs/PoseStamped.h>
 #include <std_msgs/Int8.h>
 #include <std_msgs/Bool.h>
@@ -15,14 +14,11 @@
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl_conversions/pcl_conversions.h>
-
 #include "prometheus_msgs/PositionReference.h"
 #include "prometheus_msgs/Message.h"
 #include "prometheus_msgs/DroneState.h"
 #include "prometheus_msgs/ControlCommand.h"
-
 #include "apf.h"
-#include "vfh.h"
 #include "tools.h"
 #include "message_utils.h"
 
@@ -44,7 +40,6 @@ private:
     ros::NodeHandle local_planner_nh;
 
     // 参数
-    int algorithm_mode;
     int lidar_model;
     bool is_2D;
     double max_planning_vel;

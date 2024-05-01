@@ -22,7 +22,6 @@
 #include <prometheus_msgs/UAVControlState.h>
 
 #include "apf.h"
-#include "vfh.h"
 #include "local_planner_utils.h"
 
 using namespace std;
@@ -37,7 +36,6 @@ using namespace std;
     private:
         // 参数
         int uav_id;
-        int algorithm_mode;
         int map_input_source;
         double max_planning_vel;
         double fly_height;

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(prometheus_local_planning)
+project(apf_planner)
 
 set(CMAKE_BUILD_TYPE "Release")
 set(CMAKE_CXX_FLAGS "-std=c++14")
@@ -44,7 +44,6 @@ add_executable(local_planner_main
 	src/local_planning.cpp
 	src/apf.cpp
        src/tools.cpp
-       src/vfh.cpp
 	)
 
 target_link_libraries(local_planner_main

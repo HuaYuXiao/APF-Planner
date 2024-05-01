@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
-    <name>prometheus_local_planning</name>
-    <version>1.0.0</version>
+    <name>apf_planner</name>
+    <version>1.0.1</version>
     <description>
         The prometheus_local_planning package
     </description>

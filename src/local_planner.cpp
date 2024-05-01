@@ -7,8 +7,6 @@ LocalPlanner::LocalPlanner(ros::NodeHandle &nh)
     nh.param("uav_id", uav_id, 0);
     // 【参数】是否为仿真模式
     nh.param("local_planner/sim_mode", sim_mode, false);
-    // 【参数】根据参数 planning/algorithm_mode 选择局部避障算法: 0为APF,1为VFH
-    nh.param("local_planner/algorithm_mode", algorithm_mode, 0);
     // 【参数】激光雷达模型,0代表3d雷达,1代表2d雷达
     // 3d雷达输入类型为 <sensor_msgs::PointCloud2> 2d雷达输入类型为 <sensor_msgs::LaserScan>
     nh.param("local_planner/map_input_source", map_input_source, 0);
@@ -56,18 +54,9 @@ LocalPlanner::LocalPlanner(ros::NodeHandle &nh)
     control_timer = nh.createTimer(ros::Duration(0.05), &LocalPlanner::control_cb, this);
 
     // 选择避障算法
-    if (algorithm_mode == 0)
-    {
         local_alg_ptr.reset(new APF);
         local_alg_ptr->init(nh);
         cout << GREEN << NODE_NAME << "APF init. " << TAIL << endl;
-    }
-    else if (algorithm_mode == 1)
-    {
-        local_alg_ptr.reset(new VFH);
-        local_alg_ptr->init(nh);
-        cout << GREEN << NODE_NAME << "VFH init. " << TAIL << endl;
-    }
 
     // 规划器状态参数初始化
     exec_state = EXEC_STATE::WAIT_GOAL;

@@ -7,8 +7,6 @@ namespace Local_Planning
 void Local_Planner::init(ros::NodeHandle& nh)
 {
     // 参数读取
-    // 根据参数 planning/algorithm_mode 选择局部避障算法: 0为APF,1为VFH
-    nh.param("local_planner/algorithm_mode", algorithm_mode, 0);
     // 激光雷达模型,0代表3d雷达,1代表2d雷达
     // 3d雷达输入类型为 <sensor_msgs::PointCloud2> 2d雷达输入类型为 <sensor_msgs::LaserScan>
     nh.param("local_planner/lidar_model", lidar_model, 0);
@@ -52,17 +50,9 @@ void Local_Planner::init(ros::NodeHandle& nh)
     control_timer = nh.createTimer(ros::Duration(0.05), &Local_Planner::control_cb, this);
 
     // 选择避障算法
-    if(algorithm_mode==0){
         local_alg_ptr.reset(new APF);
         local_alg_ptr->init(nh);
         pub_message(message_pub, prometheus_msgs::Message::NORMAL, NODE_NAME, "APF init.");
-    }
-    else if(algorithm_mode==1)
-    {
-        local_alg_ptr.reset(new VFH);
-        local_alg_ptr->init(nh);
-        pub_message(message_pub, prometheus_msgs::Message::NORMAL, NODE_NAME, "VFH init.");
-    }
 
     // 规划器状态参数初始化
     exec_state = EXEC_STATE::WAIT_GOAL;
