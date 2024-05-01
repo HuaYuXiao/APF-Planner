@@ -1,11 +1,9 @@
 #include "local_planning.h"
+#include <cmath>
 
-namespace Local_Planning
-{
-
+namespace Local_Planning{
 // 局部规划算法 初始化函数
-void Local_Planner::init(ros::NodeHandle& nh)
-{
+void Local_Planner::init(ros::NodeHandle& nh){
     // 参数读取
     // 激光雷达模型,0代表3d雷达,1代表2d雷达
     // 3d雷达输入类型为 <sensor_msgs::PointCloud2> 2d雷达输入类型为 <sensor_msgs::LaserScan>
@@ -15,10 +13,8 @@ void Local_Planner::init(ros::NodeHandle& nh)
 
     // 订阅目标点
     goal_sub = nh.subscribe("/prometheus/planning/goal", 1, &Local_Planner::goal_cb, this);
-
     // 订阅 无人机状态
     drone_state_sub = nh.subscribe<prometheus_msgs::DroneState>("/prometheus/drone_state", 10, &Local_Planner::drone_state_cb, this);
-
     // 订阅传感器点云信息,该话题名字可在launch文件中任意指定
     if (lidar_model == 0){
         local_point_clound_sub = nh.subscribe<sensor_msgs::PointCloud2>("/prometheus/sensors/3Dlidar_scan", 1, &Local_Planner::localcloudCallback, this);
@@ -37,6 +33,9 @@ void Local_Planner::init(ros::NodeHandle& nh)
     mainloop_timer = nh.createTimer(ros::Duration(0.2), &Local_Planner::mainloop_cb, this);
     // 控制定时器
     control_timer = nh.createTimer(ros::Duration(0.05), &Local_Planner::control_cb, this);
+
+    // 设置cout的精度为小数点后两位
+    std::cout << std::fixed << std::setprecision(2);
 
     cout << "[planner] APF-Planner initialized!" << endl;
 
@@ -66,6 +65,7 @@ void Local_Planner::init(ros::NodeHandle& nh)
 void Local_Planner::goal_cb(const geometry_msgs::PoseStampedConstPtr& msg){
         goal_pos << msg->pose.position.x, msg->pose.position.y, _DroneState.position[2];
     goal_vel.setZero();
+    goal_yaw = 2 * std::atan2(msg->pose.orientation.z, msg->pose.orientation.w);
 
     goal_ready = true;
 }
@@ -101,18 +101,16 @@ void Local_Planner::laserscanCallback(const sensor_msgs::LaserScanConstPtr &msg)
     double newPointAngle;
 
     int beamNum = _laser_scan->ranges.size();
-    for (int i = 0; i < beamNum; i++)
-    {
+    for (int i = 0; i < beamNum; i++){
         newPointAngle = _laser_scan->angle_min + _laser_scan->angle_increment * i;
         newPoint.x = _laser_scan->ranges[i] * cos(newPointAngle);
         newPoint.y = _laser_scan->ranges[i] * sin(newPointAngle);
-        newPoint.z = Drone_odom.pose.pose.position.z;
+        newPoint.z = _DroneState.position[2];
         _pointcloud.push_back(newPoint);
     }
 
     pcl_ptr = _pointcloud.makeShared();
     local_alg_ptr->set_local_map_pcl(pcl_ptr);
-
 
     latest_local_pcl_ = *pcl_ptr; 
 }
@@ -134,8 +132,7 @@ void Local_Planner::control_cb(const ros::TimerEvent& e)
     distance_to_goal = (start_pos - goal_pos).norm();
 
     // 抵达终点
-    if(distance_to_goal < MIN_DIS)
-    {
+    if(distance_to_goal < MIN_DIS){
         Command_Now.header.stamp = ros::Time::now();
         Command_Now.Mode                                = prometheus_msgs::ControlCommand::Move;
         Command_Now.Command_ID                          = Command_Now.Command_ID + 1;
@@ -145,10 +142,13 @@ void Local_Planner::control_cb(const ros::TimerEvent& e)
         Command_Now.Reference_State.position_ref[0]     = goal_pos[0];
         Command_Now.Reference_State.position_ref[1]     = goal_pos[1];
         Command_Now.Reference_State.position_ref[2]     = goal_pos[2];
-        Command_Now.Reference_State.yaw_ref             = desired_yaw;
+        Command_Now.Reference_State.yaw_ref             = goal_yaw;
+
+        cout << "yaw: " << goal_yaw << endl;
+
         command_pub.publish(Command_Now);
 
-        pub_message(message_pub, prometheus_msgs::Message::NORMAL, NODE_NAME, "Reach the goal!");
+        cout << "[planner] Reach the goal!" << endl;
         
         // 停止执行
         path_ok = false;
@@ -167,7 +167,9 @@ void Local_Planner::control_cb(const ros::TimerEvent& e)
     Command_Now.Reference_State.velocity_ref[0]     = desired_vel[0];
     Command_Now.Reference_State.velocity_ref[1]     = desired_vel[1];
     Command_Now.Reference_State.position_ref[2]     = _DroneState.position[2];
-    Command_Now.Reference_State.yaw_ref             = desired_yaw;
+    Command_Now.Reference_State.yaw_ref             = atan2(desired_vel(1), desired_vel(0));
+
+    cout << "yaw: " << atan2(desired_vel(1), desired_vel(0)) << endl;
 
     command_pub.publish(Command_Now);
 
@@ -183,10 +185,7 @@ void Local_Planner::mainloop_cb(const ros::TimerEvent& e){
     switch (exec_state){
         case WAIT_GOAL:{
             path_ok = false;
-            if(!goal_ready){
-                    message = "Waiting for a new goal.";
-                    pub_message(message_pub, prometheus_msgs::Message::WARN, NODE_NAME,message);
-            }else{
+            if(goal_ready){
                 // 获取到目标点后，生成新轨迹
                 exec_state = EXEC_STATE::PLANNING;
                 goal_ready = false;
@@ -206,14 +205,11 @@ void Local_Planner::mainloop_cb(const ros::TimerEvent& e){
                 desired_vel = desired_vel / desired_vel.norm() * max_planning_vel; 
             }
 
-                char sp[100];
-                if(planner_state == 1){
-                    sprintf(sp, "local planning desired vel: [%f, %f, %f]", desired_vel(0), desired_vel(1), desired_vel(2));
-                }else if(planner_state == 2){
-                    sprintf(sp, "Dangerous!");
-                }
-                
-                pub_message(message_pub, prometheus_msgs::Message::NORMAL, NODE_NAME,sp);
+            if(planner_state == 1){
+                cout << "[planner] desired vel: " << desired_vel(0) << " " << desired_vel(1) << " " << desired_vel(2) << endl;
+            }else if(planner_state == 2){
+                cout << "[planner] Dangerous!" << endl;
+            }
 
             break;
         }
