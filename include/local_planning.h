@@ -25,7 +25,7 @@
 using namespace std;
 #define NODE_NAME "Local_Planner [main]"
 
-#define MIN_DIS 0.1
+#define MIN_DIS 0.2
 
 namespace Local_Planning
 {
@@ -68,6 +68,7 @@ private:
 
     // 规划初始状态及终端状态
     Eigen::Vector3d start_pos, start_vel, start_acc, goal_pos, goal_vel;
+    double goal_yaw;
 
     int planner_state;
     Eigen::Vector3d desired_vel;
