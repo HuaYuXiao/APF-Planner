@@ -10,10 +10,6 @@ void Local_Planner::init(ros::NodeHandle& nh)
     // 激光雷达模型,0代表3d雷达,1代表2d雷达
     // 3d雷达输入类型为 <sensor_msgs::PointCloud2> 2d雷达输入类型为 <sensor_msgs::LaserScan>
     nh.param("local_planner/lidar_model", lidar_model, 0);
-    // TRUE代表2D平面规划及搜索,FALSE代表3D 
-    nh.param("local_planner/is_2D", is_2D, true); 
-    // 2D规划时,定高高度
-    nh.param("local_planner/fly_height_2D", fly_height_2D, 1.0);  
     // 是否为仿真模式
     nh.param("local_planner/sim_mode", sim_mode, false); 
     // 最大速度
@@ -80,49 +76,20 @@ void Local_Planner::init(ros::NodeHandle& nh)
 
 void Local_Planner::goal_cb(const geometry_msgs::PoseStampedConstPtr& msg)
 {
-    if (is_2D == true)
-    {
-        goal_pos << msg->pose.position.x, msg->pose.position.y, fly_height_2D;
-    }else
-    {
-        goal_pos << msg->pose.position.x, msg->pose.position.y, msg->pose.position.z;
-    }
+        goal_pos << msg->pose.position.x, msg->pose.position.y, _DroneState.position[2];
 
     goal_ready = true;
 
     // 获得新目标点
-    pub_message(message_pub, prometheus_msgs::Message::NORMAL, NODE_NAME,"Get a new goal point");
-
     cout << "Get a new goal point:"<< goal_pos(0) << " [m] "  << goal_pos(1) << " [m] "  << goal_pos(2)<< " [m] "   <<endl;
-
-    if(goal_pos(0) == 99 && goal_pos(1) == 99 )
-    {
-        path_ok = false;
-        goal_ready = false;
-        exec_state = EXEC_STATE::LANDING;
-        pub_message(message_pub, prometheus_msgs::Message::NORMAL, NODE_NAME,"Land");
-    }
-
 }
 
 void Local_Planner::drone_state_cb(const prometheus_msgs::DroneStateConstPtr& msg)
 {
     _DroneState = *msg;
 
-    if (is_2D == true)
-    {
-        start_pos << msg->position[0], msg->position[1], fly_height_2D;
-        start_vel << msg->velocity[0], msg->velocity[1], 0.0;
-
-        if(abs(fly_height_2D - msg->position[2]) > 0.2)
-        {
-            pub_message(message_pub, prometheus_msgs::Message::WARN, NODE_NAME,"Drone is not in the desired height.");
-        }
-    }else
-    {
         start_pos << msg->position[0], msg->position[1], msg->position[2];
         start_vel << msg->velocity[0], msg->velocity[1], msg->velocity[2];
-    }
 
     odom_ready = true;
 
@@ -149,7 +116,6 @@ void Local_Planner::drone_state_cb(const prometheus_msgs::DroneStateConstPtr& ms
     local_alg_ptr->set_odom(Drone_odom);
 
 }
-
 
 void Local_Planner::laserscanCallback(const sensor_msgs::LaserScanConstPtr &msg)
 {
@@ -349,20 +315,6 @@ void Local_Planner::mainloop_cb(const ros::TimerEvent& e)
 
             break;
         }
-        case  LANDING:
-        {
-            Command_Now.header.stamp = ros::Time::now();
-            Command_Now.Mode         = prometheus_msgs::ControlCommand::Land;
-            Command_Now.Command_ID   = Command_Now.Command_ID + 1;
-            Command_Now.source = NODE_NAME;
-
-            command_pub.publish(Command_Now);
-            break;
-        }
     }
-
 }
-
 }
-
-

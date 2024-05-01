@@ -29,12 +29,9 @@ using namespace std;
 
 namespace Local_Planning
 {
-
 extern ros::Publisher message_pub;
-
 class Local_Planner
 {
-
 private:
 
     ros::NodeHandle local_planner_nh;
@@ -94,7 +91,6 @@ private:
         WAIT_GOAL,
         PLANNING,
         TRACKING,
-        LANDING,
     };
     EXEC_STATE exec_state;
 
@@ -122,8 +118,5 @@ public:
     void init(ros::NodeHandle& nh);
 
 };
-
-
-
 }
 #endif 
