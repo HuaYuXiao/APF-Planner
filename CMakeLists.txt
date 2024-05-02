@@ -43,8 +43,7 @@ add_executable(local_planner_main
 	src/planner_node.cpp
 	src/local_planning.cpp
 	src/apf.cpp
-       src/tools.cpp
-	)
+)
 
 target_link_libraries(local_planner_main
        ${catkin_LIBRARIES}
