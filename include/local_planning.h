@@ -35,7 +35,6 @@ private:
     int lidar_model;
     double max_planning_vel;
     double safe_distance;
-    bool map_groundtruth;
 
     // 订阅无人机状态、目标点、传感器数据（生成地图）
     ros::Subscriber goal_sub;
@@ -72,15 +71,10 @@ private:
 
     geometry_msgs::Point vel_rviz;
 
-    // 打印的提示消息
-    string message;
-
     // 五种状态机
-    enum EXEC_STATE
-    {
+    enum EXEC_STATE{
         WAIT_GOAL,
         PLANNING,
-        TRACKING,
     };
     EXEC_STATE exec_state;
 

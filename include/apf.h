@@ -33,7 +33,6 @@ private:
 
     bool has_local_map_;
     bool has_odom_;
-    bool is_2D;
     
     Eigen::Vector3d push_force;
     Eigen::Vector3d attractive_force;
@@ -55,10 +54,6 @@ public:
     typedef shared_ptr<APF> Ptr;
 
 };
-
-
-
-
 }
 
 #endif 
