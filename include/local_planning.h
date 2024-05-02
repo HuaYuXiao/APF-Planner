@@ -19,7 +19,6 @@
 #include "prometheus_msgs/DroneState.h"
 #include "prometheus_msgs/ControlCommand.h"
 #include "apf.h"
-#include "tools.h"
 #include "message_utils.h"
 
 using namespace std;
@@ -27,11 +26,8 @@ using namespace std;
 
 #define MIN_DIS 0.2
 
-namespace Local_Planning
-{
-extern ros::Publisher message_pub;
-class Local_Planner
-{
+namespace Local_Planning{
+class Local_Planner{
 private:
     ros::NodeHandle local_planner_nh;
 

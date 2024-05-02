@@ -24,8 +24,6 @@ void Local_Planner::init(ros::NodeHandle& nh){
 
     // 发布 期望速度
     command_pub = nh.advertise<prometheus_msgs::ControlCommand>("/prometheus/control_command", 10);
-    // 发布提示消息
-    message_pub = nh.advertise<prometheus_msgs::Message>("/prometheus/message/local_planner", 10);
     // 发布速度用于显示
     rviz_vel_pub = nh.advertise<geometry_msgs::Point>("/prometheus/local_planner/desired_vel", 10); 
 
@@ -144,8 +142,6 @@ void Local_Planner::control_cb(const ros::TimerEvent& e)
         Command_Now.Reference_State.position_ref[2]     = goal_pos[2];
         Command_Now.Reference_State.yaw_ref             = goal_yaw;
 
-        cout << "yaw: " << goal_yaw << endl;
-
         command_pub.publish(Command_Now);
 
         cout << "[planner] Reach the goal!" << endl;
@@ -169,8 +165,6 @@ void Local_Planner::control_cb(const ros::TimerEvent& e)
     Command_Now.Reference_State.position_ref[2]     = _DroneState.position[2];
     Command_Now.Reference_State.yaw_ref             = atan2(desired_vel(1), desired_vel(0));
 
-    cout << "yaw: " << atan2(desired_vel(1), desired_vel(0)) << endl;
-
     command_pub.publish(Command_Now);
 
     //　发布rviz显示
@@ -190,7 +184,6 @@ void Local_Planner::mainloop_cb(const ros::TimerEvent& e){
                 exec_state = EXEC_STATE::PLANNING;
                 goal_ready = false;
             }
-            
             break;
         }
 
@@ -210,7 +203,6 @@ void Local_Planner::mainloop_cb(const ros::TimerEvent& e){
             }else if(planner_state == 2){
                 cout << "[planner] Dangerous!" << endl;
             }
-
             break;
         }
     }
