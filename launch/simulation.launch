@@ -3,7 +3,7 @@
     <arg name="planner" default="APF-Planner"/>
 
     <!-- world -->
-    <include file="$(find apf_planner)/launch/empty_world.launch"/>
+    <include file="$(find prometheus_gazebo)/launch/GFKD.launch"/>
 
     <!-- 1号无人机 -->
     <include file="$(find apf_planner)/launch/sitl.launch"/>
