@@ -1,4 +1,4 @@
-<!-- ego_planner 仿真 -->
+<!-- APF-Planner 仿真 -->
 <launch>
     <!-- 启动全局规划算法 -->
     <node pkg="apf_planner" type="local_planner_main" name="local_planner_main" output="screen" launch-prefix="gnome-terminal --">
@@ -6,9 +6,9 @@
         <param name="uav_id" value="1"/>
         <!-- 地图输入模式 0代表全局点云，1代表局部点云，2代表激光雷达scan数据 -->
         <param name="local_planner/map_input_source" value="0"/>
-        <param name="local_planner/local_pcl_topic_name" value="/prometheus/sensors/3Dlidar_scan"/>
+        <param name="local_planner/local_pcl_topic_name" value="/prometheus/merged_pcl"/>
         <!-- 最大速度 -->
-        <param name="local_planner/max_planning_vel" value="0.5"/>
+        <param name="local_planner/max_planning_vel" value="0.6"/>
 
         <!-- APF参数 -->
         <!-- 膨胀参数，一般设置为无人机的半径或更大 -->
@@ -16,10 +16,10 @@
         <!-- 感知距离，只考虑感知距离内的障碍物 -->
         <param name="apf/obs_distance" value="5.0" type="double"/>
         <!-- 增益 -->
-        <param name="apf/k_repulsion" value="2.0" type="double"/>
-        <param name="apf/k_attraction" value="1.0" type="double"/>
+        <param name="apf/k_repulsion" value="0.6" type="double"/>
+        <param name="apf/k_attraction" value="0.4" type="double"/>
         <!-- 安全距离，距离障碍物在安全距离内，k_repulsion自动增大 -->
-        <param name="apf/min_dist" value="0.1" type="double"/>
+        <param name="apf/min_dist" value="0.45" type="double"/>
         <!-- 最大吸引距离 -->
         <param name="apf/max_att_dist" value="4" type="double"/>
         <!-- 地面高度，不考虑低于地面高度的障碍物 -->
