@@ -153,16 +153,15 @@ void Local_Planner::control_cb(const ros::TimerEvent& e)
         return;
     }
 
-    // 目前仅支持定高飞行
     Command_Now.header.stamp = ros::Time::now();
     Command_Now.Mode                                = prometheus_msgs::ControlCommand::Move;
     Command_Now.Command_ID                          = Command_Now.Command_ID + 1;
     Command_Now.source = NODE_NAME;
-    Command_Now.Reference_State.Move_mode           = prometheus_msgs::PositionReference::XY_VEL_Z_POS;
+    Command_Now.Reference_State.Move_mode           = prometheus_msgs::PositionReference::XYZ_VEL;
     Command_Now.Reference_State.Move_frame          = prometheus_msgs::PositionReference::ENU_FRAME;
     Command_Now.Reference_State.velocity_ref[0]     = desired_vel[0];
     Command_Now.Reference_State.velocity_ref[1]     = desired_vel[1];
-    Command_Now.Reference_State.position_ref[2]     = _DroneState.position[2];
+    Command_Now.Reference_State.velocity_ref[2]     = desired_vel[2];
     Command_Now.Reference_State.yaw_ref             = atan2(desired_vel(1), desired_vel(0));
 
     command_pub.publish(Command_Now);
@@ -195,7 +194,7 @@ void Local_Planner::mainloop_cb(const ros::TimerEvent& e){
 
             //　对规划的速度进行限幅处理
             if(desired_vel.norm() > max_planning_vel){
-                desired_vel = desired_vel / desired_vel.norm() * max_planning_vel; 
+                desired_vel = desired_vel / desired_vel.norm() * max_planning_vel;
             }
 
             if(planner_state == 1){

@@ -12,6 +12,7 @@ video on [bilibili](https://www.bilibili.com/video/BV1Lr421u7z9/)
 
 ## Release Note
 
+- v1.2.0: support `XYZ_VEL` control
 - v1.1.0: drone facing front while moving
 
 ```bash
